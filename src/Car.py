@@ -5,10 +5,9 @@ import numpy as np
 import pygame
 
 class Car:
-    def __init__(self, acceleration:float = 0.2, friction:float = 0.1, max_speed:float = 7, min_rotation_speed:float = 2, max_rotation_speed:float = 4, rotation:float = 90) -> None:
+    def __init__(self, acceleration:float = 0.2, max_speed:float = 7, min_rotation_speed:float = 2, max_rotation_speed:float = 4, rotation:float = 90) -> None:
         self.speed = 0
         self.acceleration = acceleration
-        self.friction = friction
         self.max_speed = max_speed
         self.min_rotation_speed = min_rotation_speed
         self.max_rotation_speed = max_rotation_speed
@@ -22,9 +21,14 @@ class Car:
 
         self.image_rotated = pygame.transform.rotate(self.image, 0)
         self.rect_rotated = self.image_rotated.get_rect(center=self.rect.center)
+        
+        self.friction = 0.1
 
     def set_position(self, position:Tuple[int, int]) -> None:
         self.rect.center = position
+
+    def get_position(self) -> Tuple[int, int]:
+        return self.rect.center
 
     def draw(self, screen:pygame.display) -> None:
         screen.blit(self.image_rotated, self.rect_rotated)
@@ -35,13 +39,17 @@ class Car:
         if abs(self.speed) < self.max_speed:
             self.speed += speed * self.acceleration
 
-        if self.speed > 0:
-            self.speed -= self.friction
-        elif self.speed < 0:
-            self.speed += self.friction
+        if speed == 0:
+            if self.speed > 0:
+                self.speed = np.floor(self.speed*9.7)/10
+            elif self.speed < 0:
+                self.speed = np.ceil(self.speed*9.7)/10
 
-        if abs(self.speed) > 1:
+            # print(self.speed)
+
+        if abs(self.speed) >= self.acceleration:
             self.rotation += rotation * (self.min_rotation_speed + (self.rotation_speed_range * (1 - abs(self.speed) / self.max_speed)))
+        self.rotation %= 360
 
         angle_rad = math.radians(-self.rotation+90)
         velocity_x = math.sin(angle_rad) * self.speed

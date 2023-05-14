@@ -8,8 +8,9 @@ class Checkpoint:
         self.end = (x2, y2)
         self.active = 1
     
-    def reset(self):
+    def reset(self) -> None:
         self.active = 1
+        self.color = (0, 0, 255)
 
     def draw(self, screen:pygame.display) -> None:
         pygame.draw.line(screen, self.color, self.start, self.end, 3)

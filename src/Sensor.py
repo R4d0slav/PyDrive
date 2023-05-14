@@ -7,7 +7,10 @@ class Sensor:
         self.sensor_distance = distance
         self.sensor_direction = direction
         self.sensor_endpoint = None
-        
+
+    def reset(self) -> None:
+        pass
+
     def move(self, rotation:float, object:Type) -> None:
         self.sensor_direction_rotated = self.sensor_direction.rotate(-rotation)
         self.sensor_endpoint = object.center + self.sensor_direction_rotated.normalize() * self.sensor_distance
@@ -18,14 +21,32 @@ class Sensor:
     def draw_point(self, screen:pygame.display, sensor_point:Tuple[int, int], color:Tuple[int, int, int] = (255, 255, 255), size:float = 7):
         pygame.draw.circle(screen, color, (int(sensor_point[0]), int(sensor_point[1])), size)
 
-    def collisions(self, background_image:pygame.Surface, object:Type) -> Tuple:
+    # def collisions(self, background_image:pygame.Surface, object:Type) -> Tuple:
+    #     background_rect = background_image.get_rect()
+    #     for i in range(self.sensor_distance):
+    #         sensor_point = object.center + self.sensor_direction_rotated * i
+    #         pixel_color = background_rect.collidepoint(sensor_point) and background_image.get_at((int(sensor_point[0]), int(sensor_point[1])))
+    #         if pixel_color == (0, 0, 0):
+    #             collision_distance = round(math.sqrt((object.center[0] - int(sensor_point[0])) ** 2 + (object.center[1] - int(sensor_point[1])) ** 2))
+    #             if collision_distance < 0.1:
+    #                 return -1, ((255, 0, 0), (int(sensor_point[0]), int(sensor_point[1])), 10)
+    #             return collision_distance, ((255, 255, 255), (int(sensor_point[0]), int(sensor_point[1])), 7)
+    #     return 1000, None
+    
+    def collisions(self, background_image: pygame.Surface, obj: Type) -> Tuple:
         background_rect = background_image.get_rect()
         for i in range(self.sensor_distance):
-            sensor_point = object.center + self.sensor_direction_rotated * i
+            sensor_point = obj.center + self.sensor_direction_rotated * i
             pixel_color = background_rect.collidepoint(sensor_point) and background_image.get_at((int(sensor_point[0]), int(sensor_point[1])))
             if pixel_color == (0, 0, 0):
-                collision_distance = round(math.sqrt((object.center[0] - int(sensor_point[0])) ** 2 + (object.center[1] - int(sensor_point[1])) ** 2))
-                if collision_distance < 10:
-                    return -1, ((255, 0, 0), (int(sensor_point[0]), int(sensor_point[1])), 20)
+                dx = obj.center[0] - sensor_point[0]
+                dy = obj.center[1] - sensor_point[1]
+                collision_distance = round(math.sqrt(dx**2 + dy**2))
+                if collision_distance < min(obj.width // 2, obj.height // 2):
+                    return -1, ((255, 0, 0), (int(sensor_point[0]), int(sensor_point[1])), 10)
                 return collision_distance, ((255, 255, 255), (int(sensor_point[0]), int(sensor_point[1])), 7)
-        return None, None
+        return self.sensor_distance, None
+
+
+
+
